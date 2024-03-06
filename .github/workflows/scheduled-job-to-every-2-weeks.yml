@@ -1,6 +1,7 @@
 name: Schedule job to run every 2 weeks
 
 on:
+  workflow_dispatch: # Manually trigger the workflow
   schedule: # Every Monday at 6:00 in JST
     - cron: "0 21 * * 0"
 
