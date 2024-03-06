@@ -1,0 +1,39 @@
+name: Schedule job to run every 2 weeks
+
+on:
+  schedule: # Every Monday at 6:00 in JST
+    - cron: "0 21 * * 0"
+
+env:
+  CURRENT_DATE: $(date "+%Y-%m-%d")
+  BASE_DATE: "2024-03-04"
+
+jobs:
+  check-biweekly: # Job to determine if it runs every 2 weeks
+    runs-on: ubuntu-latest
+    outputs:
+      is_biweekly: ${{ steps.check_biweekly.outputs.is_biweekly }}
+
+    steps:
+      - name: Determine If Biweekly
+        id: check_biweekly
+        run: |
+          BASE_DATE=${{ env.BASE_DATE }}
+          CURRENT_DATE=${{ env.CURRENT_DATE }}
+
+          DAYS_DIFF=$(( ($(date --date=$CURRENT_DATE +%s) - $(date --date=$BASE_DATE +%s)) / ( 60 * 60 * 24 ) ))
+          if [ $(( DAYS_DIFF / 7 % 2 )) -eq 0 ]; then # 0 => biweekly, 1 => not biweekly
+            echo "is_biweekly=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_biweekly=false" >> $GITHUB_OUTPUT
+          fi
+
+
+  biweekly-job: # Job that runs every 2 weeks
+    needs: check-biweekly
+    if: needs.check-biweekly.outputs.is_biweekly == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Biweekly Job
+        run: |
+          echo "This job runs only on biweekly basis according to the condition."
