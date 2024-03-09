@@ -21,16 +21,14 @@ jobs:
       - name: Determine If Biweekly
         id: check_biweekly
         run: |
-          BASE_DATE="2024-03-03" # Sunday of the base date for biweekly
           CURRENT_DATE=${{ github.event.inputs.current_date }}
-
-          DAYS_DIFF=$(( ($(date --date=$CURRENT_DATE +%s) - $(date --date=$BASE_DATE +%s)) / ( 60 * 60 * 24 ) ))
-          if [ $(( DAYS_DIFF / 7 % 2 )) -eq 0 ]; then # 0 => biweekly, 1 => not biweekly
-            echo "is_biweekly=true" >> $GITHUB_OUTPUT
+          WEEK_NUM_STRING=$(date --date=$CURRENT_DATE +%U) # Get the week number of the current year (eg. 01, 02, ..., 52, 53) 
+          WEEK_NUM=$((10#$WEEK_NUM_STRING)) # Convert the week number to decimal
+          if [ $((WEEK_NUM % 2)) -eq 0 ]; then # Check if the week number is even
+            echo "is_biweekly=true" >> $GITHUB_OUTPUT # Set the output to true if the week number is even
           else
-            echo "is_biweekly=false" >> $GITHUB_OUTPUT
+            echo "is_biweekly=false" >> $GITHUB_OUTPUT # Set the output to false if the week number is odd
           fi
-
 
   biweekly-job: # Job that runs every 2 weeks
     needs: check-biweekly
