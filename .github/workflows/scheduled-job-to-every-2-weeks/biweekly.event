@@ -1,6 +1,6 @@
 {
   "action": "workflow_dispatch",
   "inputs": {
-    "current_date": "2024-03-04"
+    "current_date": "2024-01-01"
   }
 }
